@@ -1,6 +1,5 @@
-from openpyxl import Workbook
-from openpyxl.utils import get_column_letter
 from abc import ABC, abstractmethod
+from openpyxl import Workbook
 import csv
 import json
 import xml.etree.ElementTree as ET
@@ -8,58 +7,52 @@ import xml.etree.ElementTree as ET
 
 class Report(ABC):
     @abstractmethod
-    def generate(self, type: str, headres: list, data: list):
+    def generate(self, headers, data, filename):
         pass
 
 
 class ExcelReport(Report):
-    def generate(self, headers, data, filename):
-        # новый файл
+    def generate(self, headers: list, data: list, filename: str):
+        # создадим объект, новый лист в excel
         wb = Workbook()
-        # новый лист в excel файле
-        sheet = wb.active
-
-        # Первая строчка - заголовки
-        for i in range(len(headers)):
-            # преобразует номер столбца в букву 1-а 2-б
-            string = get_column_letter(i + 1)
-            # [Буква]1 - все заголовки пишутся в первую строку А1 В1 С1 и тд
-            sheet[f"{string}1"] = headers[i]
-        # данные
-        # индекс j перебирает строку данных
-        for j in range(len(data)):
-            # индекс i значение внутри строки
-            for i in range(len(data[i])):
-                column = get_column_letter(i + 1)
-                sheet[f"{column}{j + 2}"] = data[j][i]
+        # создадим лист(страницу)
+        new_list = wb.active
+        new_list.title = "Отчет"
+        # запишем имена заголовков в первую строку
+        for column_number, header in enumerate(headers, start=1):
+            new_list.cell(row=1, column=column_number, value=header)
+        # перебираем строку данных
+        for row_number, row_data in enumerate(data, start=2):
+            for column_number, value in enumerate(row_data, start=1):
+                new_list.cell(row=row_number, column=column_number, value=value)
         wb.save(filename)
 
 
 class CSVReport(Report):
-    def generate(self, headers, data, filename):
-        # открываем файл для записи и указываем кодировку
-        with open("report.csv", mode="w", encoding="utf-8") as file:
-            # объект для записи информации в файл csv.writer
-            file_writer = csv.writer(file, delimiter=",", lineterminator="\r")
-            file_writer.writerow(headers)
+    def generate(self, headers: list, data: list, filename: str):
+        # имя файла, режим открытия, кодировка
+        with open(
+            file="report.csv", mode="w", encoding="utf-8-sig", newline=""
+        ) as file:
+            writer = csv.writer(file, delimiter=",")
+            writer.writerow(headers)
             for row in data:
-                file_writer.writerow(row)
+                writer.writerow(row)
 
 
 class JSONReport(Report):
-    def generate(self, headers, data, filename):
-        new_list = []
-        for row in data:
-            new_dict = {}
-            for i in range(len(headers)):
-                new_dict[headers[i]] = row[i]
-            new_list.append(new_dict)
-        with open(filename, mode="w", encoding="utf-8") as file:
-            json.dump(new_list, file, ensure_ascii=False, indent=4)
+    def generate(self, headers: list, data: list, filename: str):
+        report_data = []
+        with open(file="report.json", mode="w", encoding="utf-8") as file:
+            for row in data:
+                data_dict = {}
+                data_dict = dict(zip(headers, row))
+                report_data.append(data_dict)
+            report_data = json.dump(report_data, file, ensure_ascii=False, indent=4)
 
 
 class XMLReport(Report):
-    def generate(self, headers, data, filename):
+    def generate(self, headers: list, data: list, filename: str):
         root = ET.Element("Data")
 
         for row in data:
@@ -73,10 +66,13 @@ class XMLReport(Report):
 
 
 headers = ["Заголовок 1", "Заголовок 2", "Заголовок 3"]
-data = [[1, "a", True], [2, "b", True], [3, "c", False]]
+data = [[1, "a", True], [2, "b", False], [3, "c", True]]
+
+excel_report = ExcelReport()
+# report.generate(headers, data, "C:/Users/i.bondarenko/Desktop/222/report.xlsx")
 csv_report = CSVReport()
-csv_report.generate(headers, data, "C:/Users/i.bondarenko/Desktop/report.csv")
+# cvs_report.generate(headers, data, "C:/Users/i.bondarenko/Desktop/222/report.csv")
 json_report = JSONReport()
-json_report.generate(headers, data, "C:/Users/i.bondarenko/Desktop/report.json")
+# json_report.generate(headers, data, "C:/Users/i.bondarenko/Desktop/222/report.json")
 xml_report = XMLReport()
-xml_report.generate(headers, data, "C:/Users/i.bondarenko/Desktop/report.xml")
+# xml_report.generate(headers, data, "C:/Users/i.bondarenko/Desktop/222/report.xml")

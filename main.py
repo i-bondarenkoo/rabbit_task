@@ -15,14 +15,14 @@ message = {
 def main():
     # соединение
     broker.connect()
-    broker.declare_queue(queue_name="report_queue")
+    broker.declare_queue(queue_name="testing_report")
 
     print("Пробуем отправить сообщения")
     formats = ["json", "xml", "csv", "excel"]
 
-    for fmt in formats:
+    for i in formats:
         # Обновляем тип отчета
-        message["type"] = fmt
+        message["type"] = i
         broker.send_message("report_queue", json.dumps(message))
 
     print("Пробуем получить сообщения")
