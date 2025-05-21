@@ -94,7 +94,8 @@ figure = Figure("Квадрат", "Зеленый")
 circle = Circle("Круг", "Желтный", 5)
 circle2 = Circle("Круг", "Желтный", 11)
 # print(circle.get_area())
-# circle.radius = 10
+circle.radius = 10
+print(circle.radius)
 # print(circle.get_area())
 manager = FigureManager()
 manager.add_figures(circle, circle2)
