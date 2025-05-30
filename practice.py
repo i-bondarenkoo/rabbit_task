@@ -88,21 +88,101 @@
 
 # print(nums(numbers))
 # Дан список слов. Верни самое длинное слово, у которого чётное количество букв. Если таких несколько — вернуть первое по порядку.
-words = ["car", "banana", "kiwi", "peach", "grapefruit", "melon"]
+# words = ["car", "banana", "kiwi", "peach", "grapefruit", "melon"]
 
 
-def filter_str(a):
-    words_list = [word for word in words if len(word) % 2 == 0]
-    return max(words_list, key=len) if words_list else None
+# def filter_str(a):
+#     words_list = [word for word in words if len(word) % 2 == 0]
+#     return max(words_list, key=len) if words_list else None
 
 
-print(filter_str(words))
+# print(filter_str(words))
 
-words1 = ["apple", "banana", "cherry", "kiwi", "plum"]
-
-
-def func1(s):
-    return sorted(words1, key=lambda word: len(set(word)), reverse=True)
+# words1 = ["apple", "banana", "cherry", "kiwi", "plum"]
 
 
-print(func1(words1))
+# def func1(s):
+#     return sorted(words1, key=lambda word: len(set(word)), reverse=True)
+
+
+# print(func1(words1))
+# words = ["try", "sky", "apple", "banana", "crypt", "orange"]
+
+
+# def sort_func(a: list):
+#     return sorted(words, key=lambda word: sum(char in "aeiou" for char in word))
+
+
+# print(sort_func(words))
+
+# list_str = ["hi", "hello", "cat", "sun"]
+
+
+# def sort_func2(b: list):
+#     return {
+#         len(word): [value for value in list_str if len(value) == len(word)]
+#         for word in list_str
+#     }
+
+
+# print(sort_func2(list_str))
+
+# Дан список строк. Вернуть список тех строк, в которых все символы уникальны (не повторяются внутри строки)
+# words = ["abc", "hello", "world", "python", "moon"]
+
+
+# def function_1(a: list):
+#     return [word for word in words if len(word) == len(set(word))]
+
+
+# print(function_1(words))
+
+# # Дан список списков строк. Вернуть список таких списков, где средняя длина строки больше 3.
+# data = [["hi", "hello"], ["a", "b", "c"], ["tree", "bush", "leaf"]]
+
+
+# def filter_data(data: list):
+#     return [
+#         outer for outer in data if sum(len(word) for word in outer) / len(outer) > 3
+#     ]
+
+
+# print(filter_data(data))
+
+# Дан список слов. Верни список тех слов, в которых ровно 2 уникальные гласные.
+
+
+# words = ["hello", "world", "education", "team", "idea", "queue", "zds"]
+
+
+# def func_1(a: list):
+#     return [
+#         word for word in words if len({char for char in word if char in "aieou"}) == 2
+#     ]
+
+
+# print(func_1(words))
+
+words = ["apple", "education", "media", "unique", "audio", "random", "idea"]
+
+
+def filter_words(w: list):
+    return [
+        word for word in words if len({char for char in word if char in "aeiou"}) == 3
+    ]
+
+
+print(filter_words(words))
+
+data = [[1, 4, 9], [2, 3, 9], [16, 25, 36], [10, 20, 30], [49, 64]]
+
+
+def filter_data(data: list):
+    return [
+        outer_list
+        for outer_list in data
+        if all(int(number**0.5) ** 2 == number for number in outer_list)
+    ]
+
+
+print(filter_data(data))
