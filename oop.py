@@ -1,154 +1,152 @@
 from abc import ABC, abstractmethod
 
 
-class Vehicle(ABC):
-    def __init__(self, brand: str, model: str, mileage: int, fuel_level: int):
-        self.brand = brand
-        self.model = model
-        self.mileage = mileage
-        self._fuel_level = fuel_level
+class BaseItem:
+    def __init__(self, name, price):
+        self.name = name
+        self._price = price
 
-    @abstractmethod
-    def drive(self):
-        pass
+    def __str__(self):
+        return f"Объект {self.__class__.__name__}, имя объекта {self.name}, цена {self._price}"
 
     @property
-    @abstractmethod
-    def refuel(self):
-        pass
+    def price(self):
+        return self._price
 
-    @refuel.setter
+    @price.setter
+    def price(self, value):
+        if not self.is_valid_price(value):
+            raise ValueError("Значение цены должно быть положительным числом")
+        self._price = value
+
     @abstractmethod
-    def refuel(self, amount):
+    def prepare(self):
         pass
 
     @staticmethod
-    def is_valid_fuel_amount(amount):
-        return isinstance(amount, int) and (1 < amount < 30)
-
-    def __str__(self):
-        return f"Объект {self.__class__.__name__}, марка - {self.brand}, модель - {self.model}, пробег {self.mileage} км, количество топлива {self._fuel_level} литров"
-
-
-class Car(Vehicle):
-    def __init__(self, brand: str, model: str, mileage: int, fuel_level: int):
-        super().__init__(brand, model, mileage, fuel_level)
+    def is_valid_price(value):
+        return isinstance(value, (int, float)) and value > 0
 
     @classmethod
-    def with_default_mileage(cls, brand, model, fuel_level):
-        return cls(brand=brand, model=model, mileage=0, fuel_level=fuel_level)
-
-    def drive(self, distance):
-        return f"Объект {self.__class__.__name__} проехал {distance} км "
-
-    @property
-    def refuel(self):
-        return f"Количество бензина - {self._fuel_level}"
-
-    @refuel.setter
-    def refuel(self, amount):
-        if not self.is_valid_fuel_amount(amount):
-            raise ValueError(
-                "Количество бензина должно быть целым положительным числом, не превышающим 30"
-            )
-        self._fuel_level = self._fuel_level + amount
+    def from_string(cls, data_str):
+        name_elem, price_elem = data_str.split(",")
+        return cls(name_elem, float(price_elem))
 
 
-class Motorcycle(Vehicle):
-    def __init__(self, brand: str, model: str, mileage: int, fuel_level: int):
-        super().__init__(brand, model, mileage, fuel_level)
+class Drink(BaseItem):
+    def __init__(self, name, price):
+        super().__init__(name, price)
 
-    def drive(self, distance):
-        return f"Объект {self.__class__.__name__} проехал {distance} км "
-
-    @property
-    def refuel(self):
-        return f"Количество бензина - {self._fuel_level}"
-
-    @refuel.setter
-    def refuel(self, amount):
-        if not self.is_valid_fuel_amount(amount):
-            raise ValueError(
-                "Количество бензина должно быть целым положительным числом,не превышающим 30"
-            )
-        self._fuel_level = self._fuel_level + amount
+    def prepare(self):
+        return f"Готовим напиток {self.name}"
 
 
-class Fleet:
+class Food(BaseItem):
+    def __init__(self, name, price):
+        super().__init__(name, price)
+
+    def prepare(self):
+        return f"Готовим блюдо {self.name}"
+
+
+class Menu:
     def __init__(self):
-        self.vehicle_list = []
+        self.menu_list = []
 
-    def add_vehicle(self, car: Vehicle):
-        if isinstance(car, Vehicle):
-            self.vehicle_list.append(car)
-        return f"Объект добавлен в список"
+    def add_item(self, item):
+        if isinstance(item, BaseItem):
+            self.menu_list.append(item)
+        return f"Объект успешно добавлен"
 
-    def add_more_vehicle(self, *cars):
-        for car in cars:
-            if isinstance(car, Vehicle):
-                self.vehicle_list.append(car)
-        return f"Несколько объектов успешно добавлены в список"
+    def add_more_items(self, *items):
+        for item in items:
+            self.menu_list.append(item)
+        return f"Объекты успешно добавлены"
 
-    def search_vehicle(self, brand):
-        if not isinstance(brand, str):
-            raise ValueError("Марка должна быть строкой")
-        result = "".join(str(car) for car in self.vehicle_list if car.brand == brand)
+    def get_item_by_name(self, name):
+        result = [item for item in self.menu_list if item.name == name]
         if not result:
-            return f"Такого объекта нет в списке"
-        return result
+            raise ValueError("Такого объекта нет в списке")
+        return result[0]
 
-    def delete_vehicle(self, brand):
-        if not isinstance(brand, str):
-            raise ValueError("Марка должна быть строкой")
-        delete_items = [car for car in self.vehicle_list if car.brand == brand]
-        if not delete_items:
-            return f"Такого объекта нет в списке"
-        for car in delete_items:
-            self.vehicle_list.remove(car)
-        return f"Объект марки {brand} удален из списка"
+    def update_item_price(self, name, price):
+        result = self.get_item_by_name(name)
+        result.price = price
+        return f"Цена объекта успешно изменена"
 
-    def update_mileage_vehicle(self, brand, mileage):
-        if not isinstance(brand, str) or not isinstance(mileage, int):
-            raise ValueError(
-                "Марка автомобиля должна быть строкой или пробег в километрах"
-            )
-        for car in self.vehicle_list:
-            if car.brand == brand:
-                car.mileage = mileage
-                return f"Пробег успешно изменён для автомобиля марки {brand}"
-        return f"Объект с маркой {brand} не найден"
+    def delete_item(self, name):
+        result = self.get_item_by_name(name)
+        self.menu_list.remove(result)
+        return f"Объект успешно удален"
 
     def __str__(self):
-        return "\n".join(str(car) for car in self.vehicle_list)
-
-    def __repr__(self):
-        return self.__str__()
+        return "\n".join(str(item) for item in self.menu_list)
 
 
-car1 = Car("Toyota", "Camry 40", 25000, 30)
-print(car1)
-print(car1.drive(50))
-print(car1.refuel)
-car1.refuel = 25
-print(car1.refuel)
-motorcycle1 = Motorcycle("Yokohama", "GT-501", 12000, 35)
-print(motorcycle1)
-print(motorcycle1.drive(20))
-print(motorcycle1.refuel)
-fleet = Fleet()
-fleet.add_vehicle(car1)
-lst = [
-    Car("Mazda", "Familia", 60000, 27),
-    Motorcycle("Takeshi", "GS-503", 55000, 28),
-    Car("KIA", "Optima", 22000, 18),
-]
-car4 = Car("Toyota", "Camry 40", 25000, 30)
-test = Car.with_default_mileage("Test", "Test", 25)
-fleet.add_more_vehicle(car4, motorcycle1, test)
-fleet.add_more_vehicle(*lst)
-print(fleet)
-print("-----")
-print(fleet.search_vehicle("Takeshi"))
-print(fleet.delete_vehicle("1"))
-print(fleet.update_mileage_vehicle("Toyota", 3500))
-print(fleet)
+class Order:
+    def __init__(self):
+        self.items = []
+
+    def add_to_order(self, item):
+        if not isinstance(item, (Drink, Food)):
+            raise ValueError(f"Передан не правильный объект")
+        self.items.append(item)
+
+    def add_more_to_order(self, *items):
+        for elem in items:
+            if not isinstance(elem, BaseItem) or len(items) == 0:
+                raise ValueError("Список пуст или содержит не допустимые объекты")
+            self.items.append(elem)
+        return "Объекты успешно добавлены"
+
+    def total(self):
+        result = sum(item.price for item in self.items)
+        return f"Сумма объектов составляет - {result}"
+
+    def summary(self):
+        result = [item.prepare() for item in self.items]
+        total = sum(item.price for item in self.items)
+        result.append(f"Итого: {total} rub")
+        return "\n".join(result)
+
+    def __str__(self):
+        return "\n".join(str(item) for item in self.items)
+
+
+drink1 = Drink("Kola", 85)
+drink2 = Drink("Fanta", 90)
+# drink2.price = 200
+# print(drink2.price)
+food1 = Food("Борщ", 125)
+food2 = Food("Стейк", 1200)
+print(Food.is_valid_price(food1.price))
+# print(drink1.prepare())
+# print(food1.prepare())
+menu1 = Menu()
+# menu1.add_item(drink1)
+# menu1.add_item(food1)
+# print(menu1)
+# print("---------")
+# menu1.add_more_items(drink2, food2)
+# print(menu1)
+lst = [drink1, drink2, food1]
+menu1.add_more_items(*lst)
+# print(menu1)
+# print(menu1.get_item_by_name("Борщ"))
+order1 = Order()
+# order1.add_to_order(menu1.get_item_by_name("Fanta"))
+# order1.add_to_order(menu1.get_item_by_name("Kola"))
+# order1.add_to_order(menu1.get_item_by_name("Борщ"))
+# print(order1)
+# print(order1.total())
+# print(order1.summary())
+# lst = [food1, drink1]
+# order1.add_more_to_order(*lst)
+# # print(order1)
+# food3 = Food.from_string("123, 45")
+# print(food3)
+menu1.update_item_price("Борщ", 225)
+print(menu1)
+menu1.delete_item("Борщ")
+print("---")
+print(menu1)
